@@ -1,9 +1,95 @@
 import React from 'react'
-import { render } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { ConfirmationCodeInput } from './ConfirmationCodeInput'
+
+const VALUE = 'abcdefgh'
 
 describe('ConfirmationCodeInput', () => {
   it('renders', () => {
     render(<ConfirmationCodeInput />)
+    expect(screen.queryAllByRole('textbox')).not.toHaveLength(0)
+  })
+
+  describe('Props handling', () => {
+    it('renders with provided value', () => {
+      render(<ConfirmationCodeInput fields={VALUE.length} value={VALUE} />)
+      const inputs = screen.queryAllByRole('textbox')
+
+      expect(inputs).toHaveLength(VALUE.length)
+      for (let i = 0; i < VALUE.length; i++) {
+        expect(inputs[i]).toHaveValue(VALUE[i])
+      }
+    })
+
+    it('renders only n ("fields" value) inputs', () => {
+      const fieldsValue = 12
+      render(<ConfirmationCodeInput fields={fieldsValue} />)
+      expect(screen.queryAllByRole('textbox')).toHaveLength(fieldsValue)
+    })
+  })
+
+  describe('User interaction', () => {
+    const setup = (value?: string) => {
+      const onChangeSpy = jest.fn()
+      render(
+        <ConfirmationCodeInput
+          fields={4}
+          onChange={onChangeSpy}
+          value={value}
+        />
+      )
+      const inputs = screen.queryAllByRole('textbox') as HTMLInputElement[]
+
+      return {
+        onChangeSpy,
+        inputs,
+      }
+    }
+
+    it('focuses next input on right arrow click', () => {
+      const { inputs } = setup()
+      fireEvent.keyDown(inputs[0], { key: 'ArrowRight' })
+
+      expect(
+        (document.activeElement as HTMLInputElement | null)?.dataset.index
+      ).toEqual(inputs[1].dataset.index)
+    })
+
+    it('focuses previous input on left arrow click', () => {
+      const { inputs } = setup()
+      fireEvent.keyDown(inputs[2], { key: 'ArrowLeft' })
+
+      expect(
+        (document.activeElement as HTMLInputElement | null)?.dataset.index
+      ).toEqual(inputs[1].dataset.index)
+    })
+
+    it('focuses next input after typing', () => {
+      const { inputs, onChangeSpy } = setup()
+      fireEvent.change(inputs[0], { target: { value: 'a' } })
+
+      expect(
+        (document.activeElement as HTMLInputElement | null)?.dataset.index
+      ).toEqual(inputs[1].dataset.index)
+
+      fireEvent.change(inputs[1], { target: { value: 'b' } })
+
+      expect(
+        (document.activeElement as HTMLInputElement | null)?.dataset.index
+      ).toEqual(inputs[2].dataset.index)
+
+      expect(onChangeSpy).toHaveBeenCalledTimes(2)
+      expect(onChangeSpy).toHaveBeenLastCalledWith('ab')
+    })
+
+    it('focuses previous input when backspace is clicked', () => {
+      const { inputs, onChangeSpy } = setup('abcd')
+      fireEvent.keyDown(inputs[3], { key: 'Backspace' })
+
+      expect(
+        (document.activeElement as HTMLInputElement | null)?.dataset.index
+      ).toEqual(inputs[2].dataset.index)
+      expect(onChangeSpy).toHaveBeenCalledWith('abc')
+    })
   })
 })
