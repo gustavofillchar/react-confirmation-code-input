@@ -3,4 +3,5 @@ export interface ConfirmationCodeInputProps {
   className?: string
   onChange?: (value: string) => void
   value?: string
+  disabled?: boolean
 }

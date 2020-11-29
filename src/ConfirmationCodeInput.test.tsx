@@ -26,6 +26,15 @@ describe('ConfirmationCodeInput', () => {
       render(<ConfirmationCodeInput fields={fieldsValue} />)
       expect(screen.queryAllByRole('textbox')).toHaveLength(fieldsValue)
     })
+
+    it('propagates "disabled" state to children', () => {
+      render(<ConfirmationCodeInput disabled />)
+      const inputs = screen.queryAllByRole('textbox')
+
+      for (let i = 0; i < inputs.length; i++) {
+        expect(inputs[i]).toBeDisabled()
+      }
+    })
   })
 
   describe('User interaction', () => {

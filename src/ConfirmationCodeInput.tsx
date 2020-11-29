@@ -12,7 +12,7 @@ import { ConfirmationCodeInputProps } from './ConfirmationCodeInput.types'
 export const ConfirmationCodeInput: FunctionComponent<ConfirmationCodeInputProps> = (
   props
 ) => {
-  const { fields = 4, className, onChange, value } = props
+  const { fields = 4, className, onChange, value, disabled } = props
 
   const [input, setInput] = useState<string[]>([])
   const inputRefs = useRef<HTMLInputElement[]>([])
@@ -155,6 +155,7 @@ export const ConfirmationCodeInput: FunctionComponent<ConfirmationCodeInputProps
           maxLength={fields === index + 1 ? 1 : fields}
           data-index={index}
           value={char}
+          disabled={disabled}
           ref={(inputRef) => {
             inputRefs.current[index] = inputRef!
           }}
