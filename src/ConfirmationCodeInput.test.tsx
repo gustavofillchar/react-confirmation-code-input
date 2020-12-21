@@ -102,4 +102,25 @@ describe('ConfirmationCodeInput', () => {
       expect(onChangeSpy).toHaveBeenCalledWith('abc')
     })
   })
+
+  describe('Pattern matching', () => {
+    it('should disallow forbidden chars input', () => {
+      const onChangeSpy = jest.fn()
+      render(
+        <ConfirmationCodeInput
+          fields={4}
+          regex="^[0-9]*$"
+          onChange={onChangeSpy}
+        />
+      )
+      const inputs = screen.queryAllByRole('textbox') as HTMLInputElement[]
+      inputs[0].focus()
+      fireEvent.keyDown(inputs[0], { key: 'A' })
+
+      expect(
+        (document.activeElement as HTMLInputElement | null)?.dataset.index
+      ).toEqual(inputs[0].dataset.index)
+      expect(onChangeSpy).not.toHaveBeenCalled()
+    })
+  })
 })

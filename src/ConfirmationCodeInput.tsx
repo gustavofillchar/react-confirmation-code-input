@@ -16,7 +16,15 @@ export const ConfirmationCodeInput = forwardRef<
   HTMLDivElement,
   ConfirmationCodeInputProps
 >((props, ref) => {
-  const { fields = 4, className, onChange, value, disabled, autoFocus } = props
+  const {
+    fields = 4,
+    className,
+    onChange,
+    value,
+    disabled,
+    autoFocus,
+    regex,
+  } = props
 
   const [input, setInput] = useState<string[]>([])
   const inputRefs = useRef<HTMLInputElement[]>([])
@@ -58,6 +66,14 @@ export const ConfirmationCodeInput = forwardRef<
     })
   }, [fields])
 
+  const validateInput = (value: string[]) => {
+    if (!regex) {
+      return true
+    }
+
+    return new RegExp(regex).test(value.toString())
+  }
+
   const handleInputChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     const char = event.target.value.substr(-1, 1)
     const inputIndex = Number(event.target.dataset['index'])
@@ -65,6 +81,11 @@ export const ConfirmationCodeInput = forwardRef<
 
     const clonedInput = [...input]
     clonedInput[inputIndex] = char
+
+    if (!validateInput(clonedInput)) {
+      return
+    }
+
     setInput(clonedInput)
 
     if (onChange) {
@@ -140,6 +161,11 @@ export const ConfirmationCodeInput = forwardRef<
         newInput[i] = input[i]
       }
     }
+
+    if (!validateInput(newInput)) {
+      return
+    }
+
     setInput(newInput)
 
     if (onChange) {
